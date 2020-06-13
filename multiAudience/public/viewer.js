@@ -5,8 +5,6 @@ const twitch = window.Twitch.ext;
 
 // create the request options for our Twitch API calls
 const requests = {
-  set: createRequest('POST', 'cycle'),
-  get: createRequest('GET', 'query')
 };
 
 function createRequest (type, method) {
@@ -33,17 +31,10 @@ twitch.onAuthorized(function (auth) {
   // save our credentials
   token = auth.token;
   tuid = auth.userId;
-
-  // enable the button
-  $('#cycle').removeAttr('disabled');
-
-  setAuth(token);
-  $.ajax(requests.get);
 });
 
 function updateBlock (hex) {
   twitch.rig.log('Updating block color');
-  $('#color').css('background-color', hex);
 }
 
 function logError(_, error, status) {
@@ -53,12 +44,19 @@ function logError(_, error, status) {
 function logSuccess(hex, status) {
   twitch.rig.log('EBS request returned '+hex+' ('+status+')');
 }
-
+const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 $(function () {
   // when we click the cycle button
-  $('#cycle').click(function () {
-  if(!token) { return twitch.rig.log('Not authorized'); }
-    twitch.rig.log('Requesting a color cycle');
-    $.ajax(requests.set);
-  });
+  $("button").click(function(){
+    var min = Math.ceil(0);
+    var max = Math.floor(101);
+    var number = Math.floor(Math.random() * (max - min)) + min;
+    var height = map(number,0,100,10,200)
+    var bottom = map(number,0,100,-80,140)
+    bottom = bottom +'%'
+    $("#mercury").animate({height:height, bottom:bottom})
+    twitch.rig.log(number)
+    height = number + '%'
+    $("#bulb-text").html(height)
+  })
 });
