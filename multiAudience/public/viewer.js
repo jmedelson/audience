@@ -45,6 +45,7 @@ function logSuccess(hex, status) {
   twitch.rig.log('EBS request returned '+hex+' ('+status+')');
 }
 const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
+var voteArray = [0,0,0,0,0]
 $(function () {
   // when we click the cycle button
   $("button").click(function(){
@@ -58,5 +59,16 @@ $(function () {
     twitch.rig.log(number)
     height = number + '%'
     $("#bulb-text").html(height)
+  });
+  $(".sound-button").click(function(event){
+    var target = event.target
+    twitch.rig.log(target.id)
+  })
+  $(".vote-button").click(function(event){
+    var target = event.target
+    twitch.rig.log(target.id)
+    target = parseInt(target.id.slice(-1))
+    voteArray[target] = voteArray[target] + 1
+    twitch.rig.log(voteArray)
   })
 });
