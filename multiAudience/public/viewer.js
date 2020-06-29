@@ -103,12 +103,12 @@ $(function () {
   $("#vote-button-div").on('click', '.vote-button', function(event){
     votes++
     var target = event.target
-    twitch.rig.log(target.id)
+    // twitch.rig.log(target.id)
     target = parseInt(target.id.slice(-1))
     voteArray[target] = voteArray[target] + 1
-    twitch.rig.log(voteArray.slice(1))
+    // twitch.rig.log(voteArray.slice(1))
     var x = document.getElementsByClassName("bar")
-    twitch.rig.log('l',x.length)
+    // twitch.rig.log('l',x.length)
     var counter = 1
     while(counter < voteArray.length){
       var element = "#bar" + counter
