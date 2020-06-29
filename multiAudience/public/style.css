@@ -127,3 +127,43 @@ line-height: .7em;
     font-size: 25px;
     margin-left: 8px;
 }
+.centered {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    /* bring your own prefixes */
+    transform: translate(-50%, -50%);
+}
+#graph-container{
+    background: #2036FF;
+    width: 700px;
+    height: 500px;
+}
+#bar-container{
+    margin: auto;
+    width: 90%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.bar{
+    height: 1%;
+    width: 17%;
+    background-color: #090C28;
+    position: relative;
+}
+#bar-div{
+    position: absolute;
+    bottom: 0px;
+    height: 100%;
+    width: 100%;
+    transform: scaleY(-1);
+}
+.barText{
+    transform: translate(-50%, -50%) scaleY(-1);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: white;
+    margin: 0;
+}

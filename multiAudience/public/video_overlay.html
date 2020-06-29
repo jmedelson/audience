@@ -7,6 +7,16 @@
 <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
     <div id="app" class="full-height">
         <div id="content">
+            <div class="centered" id="graph-container">
+                <div id="bar-div">
+                    <div id="bar-container">
+                        <div class="bar" id='bar1'><p id="barText1" class="barText">0%</p></div>
+                        <div class="bar" id='bar2'><p id="barText2" class="barText">0%</p></div>
+                        <div class="bar" id='bar3'><p id="barText3" class="barText">0%</p></div>
+                        <div class="bar" id='bar4'><p id="barText4" class="barText">0%</p></div>
+                    </div>
+                </div>
+            </div>
             <div id="sound-buttons">
                 <div class="sound-button-div">
                     <button id="sound1" class="sound-button">CLAP</button>
@@ -22,6 +32,10 @@
                         <button id="vote3" class="vote-button">C</button>
                         <button id="vote4" class="vote-button">D</button>
                     </div >
+                </div>
+                <div class="changeButtons">
+                    <button onclick="addButton()">up</button>
+                    <button onclick="minusButton()">down</button>
                 </div>
             </div>
             <div id="meter-container">
