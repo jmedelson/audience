@@ -46,37 +46,68 @@ function logSuccess(hex, status) {
 }
 function addButton(){
   // twitch.rig.log("ADD")
-  buttons++
-  voteArray[buttons] = 0
-  var element = '<button id="vote'+ buttons +'" class="vote-button">' + String.fromCharCode(64+buttons)  + '</button>'
-  $("#vote-button-div").append(element)
-  var element = '<div class="bar" id="bar'+ buttons +'"><p id="barText'+ buttons +'" class="barText">0%</p></div>'
-  $("#bar-container").append(element)
-  var x = document.getElementsByClassName("bar")
-  var width = (100/buttons)*0.75
-  for(var item of x){
-    item.style.width = width+'%'
+  voteArray = [0,0,0,0,0]
+  if(buttons == 2){
+    votes = 0
+    buttons = 4
+    var element = '<button id="vote3" class="vote-button">C</button>'
+    $("#vote-button-div").append(element)
+    var element = '<button id="vote4" class="vote-button">D</button>'
+    $("#vote-button-div").append(element)
+    var element = '<div class="bar" id="bar'+ 3 +'"><p id="barText'+ 3 +'" class="barText">0%</p></div>'
+    $("#bar-container").append(element)
+    var element = '<div class="bar" id="bar'+ 4 +'"><p id="barText'+ 4 +'" class="barText">0%</p></div>'
+    $("#bar-container").append(element)
+    var x = document.getElementsByClassName("bar")
+    var width = (100/buttons)*0.75
+    for(var item of x){
+      item.style.width = width+'%'
+    }
+    width = buttons * 3
+    document.getElementById('vote-button-container').style.width = width+'%' 
   }
-  width = buttons * 3
-  document.getElementById('vote-button-container').style.width = width+'%' 
+  counter = 1
+  while(counter < voteArray.length){
+    var element = "#bar" + counter
+    var element2 = '#barText' + counter
+    height = '4%'
+    $(element).stop().animate({height: height},'easeInOutCubic',function() {
+      // Animation complete.
+    })
+    $(element2).html('0% (0)')
+    counter++
+  }
   
 }
 function minusButton(){
   // twitch.rig.log("Minus")
-  var target = '#vote' + buttons
-  var target2 = '#bar' + buttons
-  $(target).remove();
-  $(target2).remove();
-  buttons--
-  voteArray.pop()
-  twitch.rig.log(voteArray.slice(1))
-  var width = buttons * 3
-  document.getElementById('vote-button-container').style.width = width+'%'
-  var x = document.getElementsByClassName("bar")
-  var width = (100/buttons)*0.75
-  for(var item of x){
-    item.style.width = width+'%'
-  } 
+  voteArray = [0,0,0]
+  if(buttons == 4){
+    votes = 0
+    buttons = 2
+    $('#vote3').remove();
+    $('#bar3').remove();
+    $('#vote4').remove();
+    $('#bar4').remove();
+    var width = buttons * 3
+    document.getElementById('vote-button-container').style.width = width+'%'
+    var x = document.getElementsByClassName("bar")
+    var width = (100/buttons)*0.75
+    for(var item of x){
+      item.style.width = width+'%'
+    } 
+  }
+  counter = 1
+  while(counter < voteArray.length){
+    var element = "#bar" + counter
+    var element2 = '#barText' + counter
+    height = '4%'
+    $(element).stop().animate({height: height},'easeInOutCubic',function() {
+      // Animation complete.
+    })
+    $(element2).html('0% (0)')
+    counter++
+  }
 }
 const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 var voteArray = [0,0,0,0,0]
@@ -106,7 +137,7 @@ $(function () {
     // twitch.rig.log(target.id)
     target = parseInt(target.id.slice(-1))
     voteArray[target] = voteArray[target] + 1
-    // twitch.rig.log(voteArray.slice(1))
+    twitch.rig.log(voteArray)
     var x = document.getElementsByClassName("bar")
     // twitch.rig.log('l',x.length)
     var counter = 1
@@ -114,7 +145,7 @@ $(function () {
       var element = "#bar" + counter
       var element2 = '#barText' + counter
       var height = voteArray[counter]/votes*100
-      $(element2).html(Math.floor(height)+ '%')
+      $(element2).html(Math.floor(height)+ '% (' +voteArray[counter]+')' )
       if(height < 1){height = 1}
       height = height + '%'
       $(element).stop().animate({height: height},'easeInOutCubic',function() {

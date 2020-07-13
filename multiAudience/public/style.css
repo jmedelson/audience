@@ -169,4 +169,5 @@ line-height: .7em;
     left: 50%;
     color: white;
     margin: 0;
+    white-space: nowrap ;
 }
