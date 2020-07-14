@@ -6,12 +6,13 @@ var buttons=4;
 var modePoll = 'true'
 // create the request options for our Twitch API calls
 const requests = {
+  set: createRequest('POST', 'message'),
 };
 
 function createRequest (type, method) {
   return {
     type: type,
-    url: location.protocol + '//localhost:8081/color/' + method,
+    url: 'https://j9y9eqotff.execute-api.us-east-2.amazonaws.com/dev/audience',
     success: updateBlock,
     error: logError
   };
@@ -55,8 +56,8 @@ twitch.onAuthorized(function (auth) {
   tuid = auth.userId;
 });
 
-function updateBlock (hex) {
-  twitch.rig.log('Updating block color');
+function updateBlock () {
+  twitch.rig.log('Updating block');
 }
 
 function logError(_, error, status) {
@@ -229,6 +230,8 @@ $(function () {
       }
       message = data[0]+'/'+data[1]
       $(element).html(message)
+      requests.set['data'] = {"tally1":5,"tally2":15,'tally3':3,'tally4':0}
+      $.ajax(requests.set);
     }
   })
 });
