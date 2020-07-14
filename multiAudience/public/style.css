@@ -198,6 +198,7 @@ line-height: .7em;
     color: white;
     box-shadow: 1px 5px #999;
     outline: 0;
+    font-size: 0;
 }
 .tally-button:active{
     box-shadow: 0 3px #666;
