@@ -27,10 +27,27 @@ twitch.onContext(function (context) {
   twitch.rig.log(context);
 });
 
+twitch.configuration.onChanged(function(){
+  console.log('On Changed')
+  let config = twitch.configuration.broadcaster ? twitch.configuration.broadcaster.content: []
+  try{
+      console.log('working', config, twitch.configuration.broadcaster)
+      config = JSON.parse(config)
+      console.log('working', config)
+  }catch(e){
+    console.log('not working')
+    console.log(e)
+  }
+})
+
 twitch.onAuthorized(function (auth) {
   // save our credentials
   token = auth.token;
   tuid = auth.userId;
+  twitch.rig.log('config1111 ping')
+  twitch.rig.log(Twitch.ext.configuration.global)
+  twitch.rig.log(Twitch.ext.configuration.broadcaster)
+  twitch.rig.log(Twitch.ext.configuration.developer)
 });
 
 function updateBlock (hex) {
@@ -154,4 +171,26 @@ $(function () {
       counter++
     }
   });
+  $(".tally-button").click(function(event){
+    var target = event.target
+    twitch.rig.log(target.id)
+    element = '#' + target.id
+    data = $(element).html()
+    data = data.split('/')
+    data[0] = parseInt(data[0])+1
+    data[1] = parseInt(data[1])
+    twitch.rig.log(data)
+    if(data[0] == data[1]){
+      twitch.rig.log('WINNER!!!')
+      data[0] = 0
+      $(element).addClass('winner')
+      setTimeout(function() {
+        $(element).removeClass("winner");
+    }, 1000);
+    }
+    message = data[0]+'/'+data[1]
+    $(element).html(message)
+
+
+  })
 });

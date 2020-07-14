@@ -25,7 +25,30 @@
       "frameSize": {
         "width": 1280,
         "height": 720
-      }
+      },
+      "viewerType": "Broadcaster"
+    },
+    {
+      "channelId": "79579372",
+      "configurationAnchor": "video_overlay",
+      "displayChannelName": "tempo",
+      "features": {
+        "isBitsEnabled": false,
+        "isChatEnabled": false,
+        "isSubscriptionStatusAvailable": false
+      },
+      "frameSize": {
+        "width": 1280,
+        "height": 720
+      },
+      "id": "2",
+      "isPopout": false,
+      "label": "",
+      "linked": true,
+      "linkedUserId": "265737932",
+      "orientation": "Portrait",
+      "type": "config",
+      "viewerType": "Broadcaster"
     }
   ],
   "frontendCommand": "",
@@ -37,7 +60,7 @@
     "bitsEnabled": false,
     "canInstall": true,
     "configUrl": "https://localhost:8080/config.html",
-    "configurationLocation": "none",
+    "configurationLocation": "hosted",
     "description": "",
     "eulaTosUrl": "",
     "hasChatSupport": false,
@@ -65,18 +88,18 @@
       "videoOverlay": "https://localhost:8080/video_overlay.html"
     },
     "views": {
-      "config": {
-        "canLinkExternalContent": false,
-        "viewerUrl": "https://localhost:8080/config.html"
-      },
       "videoOverlay": {
-        "canLinkExternalContent": false,
-        "viewerUrl": "https://localhost:8080/video_overlay.html"
+        "viewerUrl": "https://localhost:8080/video_overlay.html",
+        "canLinkExternalContent": false
+      },
+      "config": {
+        "viewerUrl": "https://localhost:8080/config.html",
+        "canLinkExternalContent": false
       }
     },
     "whitelistedConfigUrls": [],
     "whitelistedPanelUrls": []
   },
   "name": "multiAudience",
-  "version": 1
+  "version": 2
 }
