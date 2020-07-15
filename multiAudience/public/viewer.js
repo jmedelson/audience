@@ -14,13 +14,16 @@ function createRequest (type, method) {
     type: type,
     url: 'https://j9y9eqotff.execute-api.us-east-2.amazonaws.com/dev/audience',
     success: updateBlock,
-    error: logError
+    error: logError,
+    contentType: "application/json",
+    data: ''
   };
 }
 
 function setAuth (token) {
   Object.keys(requests).forEach((req) => {
     twitch.rig.log('Setting auth headers');
+    twitch.rig.log('Bearer' + token)
     requests[req].headers = { 'Authorization': 'Bearer ' + token };
   });
 }
@@ -54,6 +57,7 @@ twitch.onAuthorized(function (auth) {
   // save our credentials
   token = auth.token;
   tuid = auth.userId;
+  setAuth(token);
 });
 
 function updateBlock () {
@@ -149,46 +153,6 @@ var voteArray = [0,0,0,0,0]
 var votes = 0
 $(function () {
   // when we click the cycle button
-  $("button").click(function(){
-    var min = Math.ceil(0);
-    var max = Math.floor(101);
-    var number = Math.floor(Math.random() * (max - min)) + min;
-    var height = map(number,0,100,10,200)
-    var bottom = map(number,0,100,-80,140)
-    bottom = bottom +'%'
-    $("#mercury").animate({height:height, bottom:bottom})
-    // twitch.rig.log(number)
-    height = number + '%'
-    $("#bulb-text").html(height)
-  });
-  $(".sound-button").click(function(event){
-    var target = event.target
-    twitch.rig.log(target.id)
-  })
-  // $(".vote-button").click(function(event)
-  $("#vote-button-div").on('click', '.vote-button', function(event){
-    votes++
-    var target = event.target
-    // twitch.rig.log(target.id)
-    target = parseInt(target.id.slice(-1))
-    voteArray[target] = voteArray[target] + 1
-    twitch.rig.log(voteArray)
-    var x = document.getElementsByClassName("bar")
-    // twitch.rig.log('l',x.length)
-    var counter = 1
-    while(counter < voteArray.length){
-      var element = "#bar" + counter
-      var element2 = '#barText' + counter
-      var height = voteArray[counter]/votes*100
-      $(element2).html(Math.floor(height)+ '% (' +voteArray[counter]+')' )
-      if(height < 1){height = 1}
-      height = height + '%'
-      $(element).stop().animate({height: height},'easeInOutCubic',function() {
-        // Animation complete.
-      })
-      counter++
-    }
-  });
   $('.tally-button').click(function(event){
     if(modePoll){
       votes++
@@ -230,8 +194,20 @@ $(function () {
       }
       message = data[0]+'/'+data[1]
       $(element).html(message)
-      requests.set['data'] = {"tally1":5,"tally2":15,'tally3':3,'tally4':0}
+      requests.set['data'] = JSON.stringify({"tally1":5,"tally2":15,'tally3':3,'tally4':0, "signifier":"tally"})
       $.ajax(requests.set);
     }
   })
+});
+
+// EBS message handler
+// listen for incoming broadcast message from our EBS
+twitch.listen('broadcast', function (target, contentType, message) {
+  twitch.rig.log('Received broadcast',message);
+  try{
+    let data = JSON.parse(message).data
+    twitch.rig.log("identifier-", data["identifier"], data)
+  }catch{
+    twitch.rig.log("Error parsing pubsub message")
+  }
 });
