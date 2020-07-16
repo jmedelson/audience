@@ -3,10 +3,15 @@ let tuid = '';
 
 const twitch = window.Twitch.ext;
 var buttons=4;
-var modePoll = 'true'
+var modePoll = 'true';
+var tallyLimit = [100,100,100,100];
+var inTimeOut = false;
+var toSend = [0,0,0,0]
+var resetCount = [0,0,0,0]
 // create the request options for our Twitch API calls
 const requests = {
   set: createRequest('POST', 'message'),
+  get: createRequest("POST","initial")
 };
 
 function createRequest (type, method) {
@@ -38,14 +43,20 @@ twitch.configuration.onChanged(function(){
   try{
       console.log('working', config, twitch.configuration.broadcaster)
       config = JSON.parse(config)
+          twitch.rig.log("tally limit", tallyLimit)
       var x = document.getElementsByClassName("tally-button")
       count = 1
       for(item of x){
         if(config[count]){
           item.textContent = '0/' + config[count]
+          tallyLimit[count-1] = config[count]
+        }else{
+          tallyLimit[count-1] = 100
+          twitch.rig.log("ELSE")
         }
         count++
       }
+      twitch.rig.log("tally limit", tallyLimit, config)
       console.log('working', config)
   }catch(e){
     console.log('not working')
@@ -58,10 +69,34 @@ twitch.onAuthorized(function (auth) {
   token = auth.token;
   tuid = auth.userId;
   setAuth(token);
+  let message = {
+    "signifier":"initial"
+  }
+  requests.get['data'] = JSON.stringify(message)
+  $.ajax(requests.get);
+
 });
 
-function updateBlock () {
-  twitch.rig.log('Updating block');
+function updateBlock (res) {
+  twitch.rig.log('Updating block', res);
+  try{
+    res = JSON.parse(res)
+    if(res.identifier == "initial"){
+      twitch.rig.log("res",res)
+      let hold = document.getElementsByClassName("tally-button")
+      twitch.rig.log("LENGTH", hold.length)
+      count = 1;
+      for(item of hold){
+        resetCount[count-1] = Math.floor(res[count]/tallyLimit[count-1])
+        twitch.rig.log(count,'test',res[count]+ '/' + tallyLimit[count-1])
+        item.textContent = (res[count]%tallyLimit[count-1])+ '/' + tallyLimit[count-1];
+        count++
+        // if(count>x.length)
+      }
+    }
+  }catch(err){
+    twitch.rig.log('err',err)
+  }
 }
 
 function logError(_, error, status) {
@@ -71,6 +106,7 @@ function logError(_, error, status) {
 function logSuccess(hex, status) {
   twitch.rig.log('EBS request returned '+hex+' ('+status+')');
 }
+
 function addButton(){
   // twitch.rig.log("ADD")
   voteArray = [0,0,0,0,0]
@@ -177,25 +213,38 @@ $(function () {
     }
     if(!modePoll){
       var target = event.target
-      twitch.rig.log(target.id)
+      // twitch.rig.log(target.id)
+      var idnum = target.id.slice(-1)
+      toSend[idnum-1]++
       element = '#' + target.id
       data = $(element).html()
       data = data.split('/')
       data[0] = parseInt(data[0])+1
       data[1] = parseInt(data[1])
-      twitch.rig.log(data)
+      // twitch.rig.log(data)
       if(data[0] == data[1]){
         twitch.rig.log('WINNER!!!')
-        data[0] = 0
-        $(element).addClass('winner')
-        setTimeout(function() {
-          $(element).removeClass("winner");
-      }, 1000);
+        target.style.pointerEvents = "none"
       }
       message = data[0]+'/'+data[1]
       $(element).html(message)
-      requests.set['data'] = JSON.stringify({"tally1":5,"tally2":15,'tally3':3,'tally4':0, "signifier":"tally"})
-      $.ajax(requests.set);
+      if(!inTimeOut){
+        inTimeOut = true
+        setTimeout(function() {
+          let message = {
+            "tally1":toSend[0],
+            "tally2":toSend[1],
+            "tally3":toSend[2],
+            "tally4":toSend[3],
+            "signifier":"tally"
+          }
+          inTimeOut=false
+          toSend=[0,0,0,0]
+          requests.set['data'] = JSON.stringify(message)
+          $.ajax(requests.set);
+          twitch.rig.log('SENDING--', JSON.stringify(message))
+        }, 5000);
+      }
     }
   })
 });
@@ -207,7 +256,45 @@ twitch.listen('broadcast', function (target, contentType, message) {
   try{
     let data = JSON.parse(message).data
     twitch.rig.log("identifier-", data["identifier"], data)
-  }catch{
-    twitch.rig.log("Error parsing pubsub message")
+    if(data["identifier"] == "newTally"){
+      let tallyArray = [data["tally1"] + toSend[0],data["tally2"]+ toSend[1],data["tally3"]+ toSend[2],data["tally4"]+ toSend[3]]
+      var x = document.getElementsByClassName("tally-button")
+      count = 0; 
+      for(item of x){
+        // twitch.rig.log("check---",Math.floor(tallyArray[count]/tallyLimit[count]))
+        // twitch.rig.log("reset count---", resetCount[count])
+        // twitch.rig.log("????",resetCount)
+        if(Math.floor(tallyArray[count]/tallyLimit[count])>resetCount[count]){
+          resetCount[count] = Math.floor(tallyArray[count]/tallyLimit[count])
+          let element = "#" + item.id
+          $(element).addClass('winner')
+          setTimeout(function() {
+            twitch.rig.log("remove winner")
+            $(element).removeClass("winner")
+            $(element).css( 'pointer-events', 'auto' )
+            
+          }, 700);
+        }
+        item.textContent = (tallyArray[count]%tallyLimit[count]) + '/' + tallyLimit[count];
+        // twitch.rig.log('count',count)
+        count++
+      }
+    }
+    if(data["identifier"] == "newConfig"){
+      tallyLimit[0] = data["config1"];
+      tallyLimit[1] = data["config2"];
+      tallyLimit[2] = data["config3"];
+      tallyLimit[3] = data["config4"];
+      var x = document.getElementsByClassName("tally-button")
+      count = 0; 
+      twitch.rig.log("tally-limit-check", tallyLimit)
+      for(item of x){
+        item.textContent = '0/' + tallyLimit[count];
+        // twitch.rig.log('count',count)
+        count++
+      }
+    }
+  }catch(err){
+    twitch.rig.log("Error parsing pubsub message", err.message, err)
   }
 });

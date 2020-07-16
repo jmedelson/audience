@@ -90,6 +90,7 @@
     box-shadow: 1px 5px #999;
     outline: 0;
     font-size: 0;
+    user-select: none;
 }
 .tally-button:active{
     box-shadow: 0 3px #666;
@@ -98,6 +99,9 @@
 .winner{
     -webkit-animation: rotate-scale-up 0.65s linear both;
 	animation: rotate-scale-up 0.65s linear both;
+}
+.changeButtons{
+    user-select: none;
 }
 @keyframes rotate-scale-up {
     0% {

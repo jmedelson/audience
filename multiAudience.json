@@ -5,27 +5,25 @@
   "certificateExceptions": [],
   "extensionViews": [
     {
-      "id": "1",
-      "label": "",
       "channelId": "79579372",
       "configurationAnchor": "video_overlay",
-      "displayChannelName": "",
-      "type": "video_overlay",
+      "displayChannelName": "tempo",
       "features": {
         "isBitsEnabled": false,
         "isChatEnabled": false,
         "isSubscriptionStatusAvailable": false
       },
+      "frameSize": {
+        "width": 1024,
+        "height": 576
+      },
+      "id": "1",
+      "isPopout": false,
+      "label": "",
       "linked": false,
       "linkedUserId": "",
-      "mode": "viewer",
-      "isPopout": false,
-      "role": "Broadcaster",
       "orientation": "Portrait",
-      "frameSize": {
-        "width": 1280,
-        "height": 720
-      },
+      "type": "video_overlay",
       "viewerType": "Broadcaster"
     },
     {
@@ -38,17 +36,17 @@
         "isSubscriptionStatusAvailable": false
       },
       "frameSize": {
-        "width": 1280,
-        "height": 720
+        "width": 1024,
+        "height": 576
       },
       "id": "2",
       "isPopout": false,
       "label": "",
-      "linked": true,
-      "linkedUserId": "265737932",
+      "linked": false,
+      "linkedUserId": "",
       "orientation": "Portrait",
-      "type": "config",
-      "viewerType": "Broadcaster"
+      "type": "video_overlay",
+      "viewerType": "Logged-In Viewer"
     }
   ],
   "frontendCommand": "",
