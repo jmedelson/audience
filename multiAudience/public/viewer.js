@@ -8,6 +8,8 @@ var tallyLimit = [100,100,100,100];
 var inTimeOut = false;
 var toSend = [0,0,0,0]
 var resetCount = [0,0,0,0]
+var voteArray = [0,0,0,0,0]
+var votes = 0
 // create the request options for our Twitch API calls
 const requests = {
   set: createRequest('POST', 'message'),
@@ -78,9 +80,10 @@ twitch.onAuthorized(function (auth) {
 });
 
 function updateBlock (res) {
-  twitch.rig.log('Updating block', res);
+  twitch.rig.log('Updating block');
   try{
     res = JSON.parse(res)
+    twitch.rig.log('Parsed',res.identifier);
     if(res.identifier == "initial"){
       twitch.rig.log("res",res)
       let hold = document.getElementsByClassName("tally-button")
@@ -93,6 +96,10 @@ function updateBlock (res) {
         count++
         // if(count>x.length)
       }
+      voteArray = [0,res["poll1"],res["poll2"],res["poll3"],res["poll4"]]
+      votes = res["pollCount"]
+      adjustPolls()
+      $("#graph-container").show()
     }
   }catch(err){
     twitch.rig.log('err',err)
@@ -106,7 +113,24 @@ function logError(_, error, status) {
 function logSuccess(hex, status) {
   twitch.rig.log('EBS request returned '+hex+' ('+status+')');
 }
-
+function adjustPolls(){
+  twitch.rig.log("adjusting", voteArray)
+  let counter = 1
+  while(counter < voteArray.length){
+    let element = "#bar" + counter
+    let element2 = '#barText' + counter
+    let height = voteArray[counter]/votes*100
+    if(isNaN(height)){height='0'}
+    $(element2).html(Math.floor(height)+ '% (' +voteArray[counter]+')' )
+    if(height < 4){height = 4}
+    height = height + '%'
+    twitch.rig.log("data==", counter, height, voteArray[counter], votes)
+    $(element).stop().animate({height: height},'easeInOutCubic',function() {
+      // Animation complete.
+    })
+    counter++
+  }
+}
 function addButton(){
   // twitch.rig.log("ADD")
   voteArray = [0,0,0,0,0]
@@ -126,23 +150,14 @@ function addButton(){
     }
   }
   counter = 1
-  while(counter < voteArray.length){
-    var element = "#bar" + counter
-    var element2 = '#barText' + counter
-    height = '4%'
-    $(element).stop().animate({height: height},'easeInOutCubic',function() {
-      // Animation complete.
-    })
-    $(element2).html('0% (0)')
-    counter++
-  }
+  adjustPolls()
   
 }
 function minusButton(){
   // twitch.rig.log("Minus")
   voteArray = [0,0,0,0,0]
+  votes = 0
   if(buttons == 4){
-    votes = 0
     buttons = 2
     $('#vote3').toggle();
     $('#bar3').toggle();
@@ -158,16 +173,7 @@ function minusButton(){
     } 
   }
   counter = 1
-  while(counter < voteArray.length){
-    var element = "#bar" + counter
-    var element2 = '#barText' + counter
-    height = '4%'
-    $(element).stop().animate({height: height},'easeInOutCubic',function() {
-      // Animation complete.
-    })
-    $(element2).html('0% (0)')
-    counter++
-  }
+  adjustPolls()
 }
 function tallyMode(){
   twitch.rig.log("TALLY MODE");
@@ -188,32 +194,25 @@ function resetMode(){
   requests.set['data'] = JSON.stringify(message)
   $.ajax(requests.set);
 }
-const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
-var voteArray = [0,0,0,0,0]
-var votes = 0
+// const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 $(function () {
   // when we click the cycle button
   $('.tally-button').click(function(event){
     if(modePoll){
+      
       votes++
       var target = event.target
       target = parseInt(target.id.slice(-1))
       voteArray[target] = voteArray[target] + 1
       twitch.rig.log(voteArray)
-      var x = document.getElementsByClassName("bar")
-      var counter = 1
-      while(counter < voteArray.length){
-        var element = "#bar" + counter
-        var element2 = '#barText' + counter
-        var height = voteArray[counter]/votes*100
-        $(element2).html(Math.floor(height)+ '% (' +voteArray[counter]+')' )
-        if(height < 1){height = 1}
-        height = height + '%'
-        $(element).stop().animate({height: height},'easeInOutCubic',function() {
-          // Animation complete.
-        })
-        counter++
+      // var x = document.getElementsByClassName("bar")
+      message = {
+        "signifier":"vote",
+        "voted": "poll"+target
       }
+      requests.set['data'] = JSON.stringify(message)
+      $.ajax(requests.set);
+      adjustPolls()
     }
     if(!modePoll){
       var target = event.target
@@ -283,8 +282,12 @@ twitch.listen('broadcast', function (target, contentType, message) {
         // twitch.rig.log('count',count)
         count++
       }
-    }
-    if(data["identifier"] == "newConfig"){
+    }else if(data["identifier"] == "newPoll"){
+      voteArray=[0,data["poll1"],data["poll2"],data["poll3"],data["poll4"]]
+      votes = data["count"]
+      twitch.rig.log("New Poll",voteArray,votes)
+      adjustPolls()
+    }else if(data["identifier"] == "newConfig"){
       tallyLimit[0] = data["config1"];
       tallyLimit[1] = data["config2"];
       tallyLimit[2] = data["config3"];
@@ -297,6 +300,18 @@ twitch.listen('broadcast', function (target, contentType, message) {
         // twitch.rig.log('count',count)
         count++
       }
+    }else if(data["identifier"] == "reset"){
+      voteArray = [0,0,0,0,0]
+      votes = 0
+      adjustPolls()
+      var x = document.getElementsByClassName("tally-button")
+      let count = 0
+      for(item of x){
+        item.textContent = '0/' + tallyLimit[count];
+        count++
+      }
+      toSend = [0,0,0,0]
+      resetCount = [0,0,0,0]
     }
   }catch(err){
     twitch.rig.log("Error parsing pubsub message", err.message, err)

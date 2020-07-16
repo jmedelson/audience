@@ -29,8 +29,9 @@
 }
 #graph-container{
     background: #2036FF;
-    width: 700px;
-    height: 500px;
+    width: 65%;
+    height: 75%;
+    display: none;
 }
 #bar-container{
     margin: auto;
