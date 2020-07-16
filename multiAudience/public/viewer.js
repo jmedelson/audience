@@ -184,6 +184,13 @@ function pollMode(){
   $('.tally-button').css("font-size", 0)
   modePoll = true
 }
+function resetMode(){
+  let message = {
+    "signifier":"reset"
+  }
+  requests.set['data'] = JSON.stringify(message)
+  $.ajax(requests.set);
+}
 const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 var voteArray = [0,0,0,0,0]
 var votes = 0

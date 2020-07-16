@@ -82,6 +82,24 @@ const configDB = async (config1,config2,config3,config4) => {
     };
     return await documentClient.update(params).promise();
 };
+const resetDB = async() =>{
+    console.log("RESET DB START")
+    const params = {
+        TableName: 'audience-data',
+        Key:{
+            "flag": "tallys"
+        },
+        UpdateExpression: "SET tally1 =:a, tally2 =:a, tally3 =:a, tally4 =:a, #tallycount =:a",
+        ExpressionAttributeNames:{
+            "#tallycount": "count"
+        },
+        ExpressionAttributeValues:{
+            ":a":0
+        },
+        ReturnValues:"NONE"
+    };
+    return await documentClient.update(params).promise();
+}
 
 const sendBroadcast = async (channel, data) =>{
     const link = `https://api.twitch.tv/extensions/message/` + channel
@@ -152,6 +170,8 @@ const audienceHandler = async(data, event) =>{
             "identifier": "initial"
         }
         return message
+    }else if(data["signifier"] == 'reset'){
+        await resetDB()
     }
     
     return false
