@@ -124,8 +124,6 @@ function addButton(){
     for(var item of x){
       item.style.width = width+'%'
     }
-    width = buttons * 3
-    document.getElementById('vote-button-container').style.width = width+'%' 
   }
   counter = 1
   while(counter < voteArray.length){
@@ -153,7 +151,6 @@ function minusButton(){
     $('#tally3').toggle()
     $('#tally4').toggle()
     var width = buttons * 3
-    document.getElementById('vote-button-container').style.width = width+'%'
     var x = document.getElementsByClassName("bar")
     var width = (100/buttons)*0.75
     for(var item of x){

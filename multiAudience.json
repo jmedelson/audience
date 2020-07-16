@@ -25,28 +25,6 @@
       "orientation": "Portrait",
       "type": "video_overlay",
       "viewerType": "Broadcaster"
-    },
-    {
-      "channelId": "79579372",
-      "configurationAnchor": "video_overlay",
-      "displayChannelName": "tempo",
-      "features": {
-        "isBitsEnabled": false,
-        "isChatEnabled": false,
-        "isSubscriptionStatusAvailable": false
-      },
-      "frameSize": {
-        "width": 1024,
-        "height": 576
-      },
-      "id": "2",
-      "isPopout": false,
-      "label": "",
-      "linked": false,
-      "linkedUserId": "",
-      "orientation": "Portrait",
-      "type": "video_overlay",
-      "viewerType": "Logged-In Viewer"
     }
   ],
   "frontendCommand": "",
