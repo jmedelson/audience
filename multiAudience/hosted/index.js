@@ -40,7 +40,35 @@ const initialDB = async () => {
     };
     return await documentClient.get(params).promise();
 }
-
+const initialDB2 = async () => {
+    console.log("initial DB start")
+    const params = {
+        TableName: 'audience-data',
+        Key:{
+            "flag": "polls"
+        }
+    };
+    return await documentClient.get(params).promise();
+}
+const pollDB = async (pollnum) => {
+    console.log("Poll DB START")
+    const params = {
+        TableName: 'audience-data',
+        Key:{
+            "flag": "polls"
+        },
+        UpdateExpression: "ADD #pollnum :a, #tallycount :a",
+        ExpressionAttributeNames:{
+            "#tallycount": "count",
+            "#pollnum":pollnum,
+        },
+        ExpressionAttributeValues:{
+            ":a":1
+        },
+        ReturnValues:"ALL_NEW"
+    };
+    return await documentClient.update(params).promise();
+}
 const tallyDB = async (tally1,tally2,tally3,tally4) => {
     console.log("Tally DB START")
     const params = {
@@ -100,6 +128,24 @@ const resetDB = async() =>{
     };
     return await documentClient.update(params).promise();
 }
+const resetDB2 = async() =>{
+    console.log("RESET DB START")
+    const params = {
+        TableName: 'audience-data',
+        Key:{
+            "flag": "polls"
+        },
+        UpdateExpression: "SET poll1 =:a, poll2 =:a, poll3 =:a, poll4 =:a, #tallycount =:a",
+        ExpressionAttributeNames:{
+            "#tallycount": "count"
+        },
+        ExpressionAttributeValues:{
+            ":a":0
+        },
+        ReturnValues:"NONE"
+    };
+    return await documentClient.update(params).promise();
+}
 
 const sendBroadcast = async (channel, data) =>{
     const link = `https://api.twitch.tv/extensions/message/` + channel
@@ -144,6 +190,25 @@ const audienceHandler = async(data, event) =>{
         }else{
             console.log("no pubsub yet", updatedTally['count'])
         }
+    }else if(data["signifier"] == "vote"){
+        let pollData = await pollDB(data['voted']);
+        console.log("POLL DATA", pollData)
+        if(pollData["Attributes"]["count"]%2 == 0){
+            console.log("sending pubsub")
+            const payload = verifyAndDecode(event.headers.Authorization);
+            const channelId = payload.channel_id;
+            var message = {
+                data:{
+                    poll1:pollData["Attributes"]['poll1'],
+                    poll2:pollData["Attributes"]['poll2'],
+                    poll3:pollData["Attributes"]['poll3'],
+                    poll4:pollData["Attributes"]['poll4'],
+                    count:pollData["Attributes"]['count'],
+                    identifier:'newPoll'
+                }
+            }
+            await sendBroadcast(channelId, JSON.stringify(message))
+        }
     }else if(data["signifier"] == "config-update"){
         const payload = verifyAndDecode(event.headers.Authorization);
         const channelId = payload.channel_id;
@@ -160,18 +225,36 @@ const audienceHandler = async(data, event) =>{
         console.log("NEW CONFIG-", newConfig)
     }else if(data["signifier"] == 'initial'){
         console.log("INITIAL")
-        let dbResult = await initialDB()
+        let [dbResult, dbResult2] = await Promise.all([initialDB(),initialDB2()]);
         dbResult = dbResult["Item"]
         message = {
             1:dbResult["tally1"],
             2:dbResult["tally2"],
             3:dbResult["tally3"],
             4:dbResult["tally4"],
+            poll1:dbResult2["Item"]['poll1'],
+            poll2:dbResult2["Item"]['poll2'],
+            poll3:dbResult2["Item"]['poll3'],
+            poll4:dbResult2["Item"]['poll4'],
+            pollCount:dbResult2["Item"]["count"],
             "identifier": "initial"
         }
         return message
     }else if(data["signifier"] == 'reset'){
-        await resetDB()
+        const payload = verifyAndDecode(event.headers.Authorization);
+        const channelId = payload.channel_id;
+        var message = {
+            data:{
+              identifier:'reset',
+              viewChange:'none'
+            }
+        }
+        if(data["viewChange"]=="two"){
+            message['data']['viewChange'] = 'two'
+        }else if(data["viewChange"]=="four"){
+            message['data']['viewChange'] = 'four'
+        }
+        let [reset1,reset2, broadcastResult] = await Promise.all([resetDB(),resetDB2(),sendBroadcast(channelId, JSON.stringify(message))]);
     }
     
     return false
@@ -197,6 +280,9 @@ exports.handler = async (event) => {
     if(x){
         return response(200, JSON.stringify(x));
     }else{
-        return response(200, 'success');
+        let message ={
+            "identifier": "success"
+        }
+        return response(200, JSON.stringify(message));
     }
 }

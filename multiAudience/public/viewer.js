@@ -54,7 +54,6 @@ twitch.configuration.onChanged(function(){
           tallyLimit[count-1] = config[count]
         }else{
           tallyLimit[count-1] = 100
-          twitch.rig.log("ELSE")
         }
         count++
       }
@@ -87,14 +86,11 @@ function updateBlock (res) {
     if(res.identifier == "initial"){
       twitch.rig.log("res",res)
       let hold = document.getElementsByClassName("tally-button")
-      twitch.rig.log("LENGTH", hold.length)
       count = 1;
       for(item of hold){
         resetCount[count-1] = Math.floor(res[count]/tallyLimit[count-1])
-        twitch.rig.log(count,'test',res[count]+ '/' + tallyLimit[count-1])
         item.textContent = (res[count]%tallyLimit[count-1])+ '/' + tallyLimit[count-1];
         count++
-        // if(count>x.length)
       }
       voteArray = [0,res["poll1"],res["poll2"],res["poll3"],res["poll4"]]
       votes = res["pollCount"]
@@ -114,7 +110,6 @@ function logSuccess(hex, status) {
   twitch.rig.log('EBS request returned '+hex+' ('+status+')');
 }
 function adjustPolls(){
-  twitch.rig.log("adjusting", voteArray)
   let counter = 1
   while(counter < voteArray.length){
     let element = "#bar" + counter
@@ -124,55 +119,56 @@ function adjustPolls(){
     $(element2).html(Math.floor(height)+ '% (' +voteArray[counter]+')' )
     if(height < 4){height = 4}
     height = height + '%'
-    twitch.rig.log("data==", counter, height, voteArray[counter], votes)
-    $(element).stop().animate({height: height},'easeInOutCubic',function() {
+    $(element).stop().animate({height: height},800,function() {
       // Animation complete.
     })
     counter++
   }
 }
+function adjustButtons(){
+  $('#vote3').toggle();
+  $('#bar3').toggle();
+  $('#vote4').toggle();
+  $('#bar4').toggle();
+  $('#tally3').toggle()
+  $('#tally4').toggle()
+  var x = document.getElementsByClassName("bar")
+  var width = (100/buttons)*0.75
+  for(var item of x){
+    item.style.width = width+'%'
+  }
+}
 function addButton(){
   // twitch.rig.log("ADD")
-  voteArray = [0,0,0,0,0]
-  if(buttons == 2){
-    votes = 0
-    buttons = 4
-    $('#vote3').toggle();
-    $('#bar3').toggle();
-    $('#vote4').toggle();
-    $('#bar4').toggle();
-    $('#tally3').toggle()
-    $('#tally4').toggle()
-    var x = document.getElementsByClassName("bar")
-    var width = (100/buttons)*0.75
-    for(var item of x){
-      item.style.width = width+'%'
-    }
+  let message = {
+    "signifier":"reset",
+    "viewChange":"four"
   }
-  counter = 1
+  requests.set['data'] = JSON.stringify(message)
+  $.ajax(requests.set);
+  voteArray = [0,0,0,0,0]
+  votes = 0
+  if(buttons == 2){
+    buttons = 4
+    adjustButtons()
+  }
   adjustPolls()
   
 }
 function minusButton(){
   // twitch.rig.log("Minus")
+  let message = {
+    "signifier":"reset",
+    "viewChange":"two"
+  }
+  requests.set['data'] = JSON.stringify(message)
+  $.ajax(requests.set);
   voteArray = [0,0,0,0,0]
   votes = 0
   if(buttons == 4){
     buttons = 2
-    $('#vote3').toggle();
-    $('#bar3').toggle();
-    $('#vote4').toggle();
-    $('#bar4').toggle();
-    $('#tally3').toggle()
-    $('#tally4').toggle()
-    var width = buttons * 3
-    var x = document.getElementsByClassName("bar")
-    var width = (100/buttons)*0.75
-    for(var item of x){
-      item.style.width = width+'%'
-    } 
+    adjustButtons()
   }
-  counter = 1
   adjustPolls()
 }
 function tallyMode(){
@@ -189,7 +185,8 @@ function pollMode(){
 }
 function resetMode(){
   let message = {
-    "signifier":"reset"
+    "signifier":"reset",
+    "viewChange":"none"
   }
   requests.set['data'] = JSON.stringify(message)
   $.ajax(requests.set);
@@ -264,9 +261,6 @@ twitch.listen('broadcast', function (target, contentType, message) {
       var x = document.getElementsByClassName("tally-button")
       count = 0; 
       for(item of x){
-        // twitch.rig.log("check---",Math.floor(tallyArray[count]/tallyLimit[count]))
-        // twitch.rig.log("reset count---", resetCount[count])
-        // twitch.rig.log("????",resetCount)
         if(Math.floor(tallyArray[count]/tallyLimit[count])>resetCount[count]){
           resetCount[count] = Math.floor(tallyArray[count]/tallyLimit[count])
           let element = "#" + item.id
@@ -294,16 +288,12 @@ twitch.listen('broadcast', function (target, contentType, message) {
       tallyLimit[3] = data["config4"];
       var x = document.getElementsByClassName("tally-button")
       count = 0; 
-      twitch.rig.log("tally-limit-check", tallyLimit)
       for(item of x){
         item.textContent = '0/' + tallyLimit[count];
         // twitch.rig.log('count',count)
         count++
       }
     }else if(data["identifier"] == "reset"){
-      voteArray = [0,0,0,0,0]
-      votes = 0
-      adjustPolls()
       var x = document.getElementsByClassName("tally-button")
       let count = 0
       for(item of x){
@@ -312,6 +302,16 @@ twitch.listen('broadcast', function (target, contentType, message) {
       }
       toSend = [0,0,0,0]
       resetCount = [0,0,0,0]
+      voteArray = [0,0,0,0,0]
+      votes = 0
+      adjustPolls()
+      if(data["viewChange"] == 'two' && buttons == 4){
+        buttons = 2
+        adjustButtons()
+      }else if(data["viewChange"] == 'four' && buttons == 2){
+        buttons = 4
+        adjustButtons()
+      }
     }
   }catch(err){
     twitch.rig.log("Error parsing pubsub message", err.message, err)

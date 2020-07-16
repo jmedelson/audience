@@ -3,52 +3,7 @@
   "backendCommand": "node backend -c \"ys9f95azykumc6l73h9obn6foytwnt\" -s \"pPiuyxs1Rfr2Fa4yXjLuA2mAF244I667JsLl2Wfelc4=\"",
   "backendFolderName": "multiAudience\\services",
   "certificateExceptions": [],
-  "extensionViews": [
-    {
-      "channelId": "79579372",
-      "configurationAnchor": "video_overlay",
-      "displayChannelName": "tempo",
-      "features": {
-        "isBitsEnabled": false,
-        "isChatEnabled": false,
-        "isSubscriptionStatusAvailable": false
-      },
-      "frameSize": {
-        "width": 1024,
-        "height": 576
-      },
-      "id": "1",
-      "isPopout": false,
-      "label": "",
-      "linked": false,
-      "linkedUserId": "",
-      "orientation": "Portrait",
-      "type": "video_overlay",
-      "viewerType": "Broadcaster"
-    },
-    {
-      "channelId": "79579372",
-      "configurationAnchor": "video_overlay",
-      "displayChannelName": "tempo",
-      "features": {
-        "isBitsEnabled": false,
-        "isChatEnabled": false,
-        "isSubscriptionStatusAvailable": false
-      },
-      "frameSize": {
-        "width": 852,
-        "height": 480
-      },
-      "id": "2",
-      "isPopout": false,
-      "label": "",
-      "linked": false,
-      "linkedUserId": "",
-      "orientation": "Portrait",
-      "type": "video_overlay",
-      "viewerType": "Broadcaster"
-    }
-  ],
+  "extensionViews": [],
   "frontendCommand": "",
   "frontendFolderName": "multiAudience\\public",
   "manifest": {
