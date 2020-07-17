@@ -79,12 +79,12 @@ twitch.onAuthorized(function (auth) {
 });
 
 function updateBlock (res) {
-  twitch.rig.log('Updating block');
+  // twitch.rig.log('Updating block');
   try{
     res = JSON.parse(res)
-    twitch.rig.log('Parsed',res.identifier);
+    // twitch.rig.log('Parsed',res.identifier);
     if(res.identifier == "initial"){
-      twitch.rig.log("res",res)
+      // twitch.rig.log("res",res)
       let hold = document.getElementsByClassName("tally-button")
       count = 1;
       for(item of hold){
@@ -95,7 +95,15 @@ function updateBlock (res) {
       voteArray = [0,res["poll1"],res["poll2"],res["poll3"],res["poll4"]]
       votes = res["pollCount"]
       adjustPolls()
-      $("#graph-container").show()
+      if(res['display']== 'poll'){
+        $('#graph-container').show()
+        $('.tally-button').css("font-size", 0)
+        modePoll = true
+      }else if(res['display']== 'tally'){
+        $('#graph-container').hide();
+        $('.tally-button').css("font-size", '13px')
+        modePoll = false
+      }
     }
   }catch(err){
     twitch.rig.log('err',err)
@@ -107,7 +115,7 @@ function logError(_, error, status) {
 }
 
 function logSuccess(hex, status) {
-  twitch.rig.log('EBS request returned '+hex+' ('+status+')');
+  // twitch.rig.log('EBS request returned '+hex+' ('+status+')');
 }
 function adjustPolls(){
   let counter = 1
@@ -172,13 +180,25 @@ function minusButton(){
   adjustPolls()
 }
 function tallyMode(){
-  twitch.rig.log("TALLY MODE");
+  // twitch.rig.log("TALLY MODE");
+  let message = {
+    "signifier":"mode",
+    "display": 'tally'
+  }
+  requests.set['data'] = JSON.stringify(message)
+  $.ajax(requests.set);
   $('#graph-container').hide();
   $('.tally-button').css("font-size", '13px')
   modePoll = false
 }
 function pollMode(){
-  twitch.rig.log("POLL MODE")
+  // twitch.rig.log("POLL MODE")
+  let message = {
+    "signifier":"mode",
+    "display": 'poll'
+  }
+  requests.set['data'] = JSON.stringify(message)
+  $.ajax(requests.set);
   $('#graph-container').show()
   $('.tally-button').css("font-size", 0)
   modePoll = true
@@ -201,7 +221,7 @@ $(function () {
       var target = event.target
       target = parseInt(target.id.slice(-1))
       voteArray[target] = voteArray[target] + 1
-      twitch.rig.log(voteArray)
+      // twitch.rig.log(voteArray)
       // var x = document.getElementsByClassName("bar")
       message = {
         "signifier":"vote",
@@ -252,10 +272,10 @@ $(function () {
 // EBS message handler
 // listen for incoming broadcast message from our EBS
 twitch.listen('broadcast', function (target, contentType, message) {
-  twitch.rig.log('Received broadcast',message);
+  // twitch.rig.log('Received broadcast',message);
   try{
     let data = JSON.parse(message).data
-    twitch.rig.log("identifier-", data["identifier"], data)
+    // twitch.rig.log("identifier-", data["identifier"], data)
     if(data["identifier"] == "newTally"){
       let tallyArray = [data["tally1"] + toSend[0],data["tally2"]+ toSend[1],data["tally3"]+ toSend[2],data["tally4"]+ toSend[3]]
       var x = document.getElementsByClassName("tally-button")
@@ -279,7 +299,7 @@ twitch.listen('broadcast', function (target, contentType, message) {
     }else if(data["identifier"] == "newPoll"){
       voteArray=[0,data["poll1"],data["poll2"],data["poll3"],data["poll4"]]
       votes = data["count"]
-      twitch.rig.log("New Poll",voteArray,votes)
+      // twitch.rig.log("New Poll",voteArray,votes)
       adjustPolls()
     }else if(data["identifier"] == "newConfig"){
       tallyLimit[0] = data["config1"];
@@ -311,6 +331,16 @@ twitch.listen('broadcast', function (target, contentType, message) {
       }else if(data["viewChange"] == 'four' && buttons == 2){
         buttons = 4
         adjustButtons()
+      }
+    }else if(data["identifier"] == "mode"){
+      if(data["display"] == 'poll'){
+        $('#graph-container').show()
+        $('.tally-button').css("font-size", 0)
+        modePoll = true
+      }else if(data["display"] == 'tally'){
+        $('#graph-container').hide();
+        $('.tally-button').css("font-size", '13px')
+        modePoll = false
       }
     }
   }catch(err){
