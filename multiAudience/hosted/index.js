@@ -110,6 +110,25 @@ const configDB = async (config1,config2,config3,config4) => {
     };
     return await documentClient.update(params).promise();
 };
+const DBmode = async(mode) =>{
+    console.log("MODE DB START")
+    const params = {
+        TableName: 'audience-data',
+        Key:{
+            "flag": "polls"
+        },
+        UpdateExpression: "SET #mode =:a",
+        ExpressionAttributeNames:{
+            "#mode": "mode"
+        },
+        ExpressionAttributeValues:{
+            ":a":mode,
+        },
+        ReturnValues:"NONE"
+    };
+    return await documentClient.update(params).promise();
+}
+
 const resetDB = async() =>{
     console.log("RESET DB START")
     const params = {
@@ -193,7 +212,7 @@ const audienceHandler = async(data, event) =>{
     }else if(data["signifier"] == "vote"){
         let pollData = await pollDB(data['voted']);
         console.log("POLL DATA", pollData)
-        if(pollData["Attributes"]["count"]%2 == 0){
+        if(pollData["Attributes"]["count"]%1 == 0){
             console.log("sending pubsub")
             const payload = verifyAndDecode(event.headers.Authorization);
             const channelId = payload.channel_id;
@@ -232,6 +251,7 @@ const audienceHandler = async(data, event) =>{
             2:dbResult["tally2"],
             3:dbResult["tally3"],
             4:dbResult["tally4"],
+            display:dbResult2["Item"]["mode"],
             poll1:dbResult2["Item"]['poll1'],
             poll2:dbResult2["Item"]['poll2'],
             poll3:dbResult2["Item"]['poll3'],
@@ -255,6 +275,16 @@ const audienceHandler = async(data, event) =>{
             message['data']['viewChange'] = 'four'
         }
         let [reset1,reset2, broadcastResult] = await Promise.all([resetDB(),resetDB2(),sendBroadcast(channelId, JSON.stringify(message))]);
+    }else if(data["signifier"] == 'mode'){
+        message={
+            data:{
+                identifier:"mode",
+                display:data["display"]
+            }
+        }
+        const payload = verifyAndDecode(event.headers.Authorization);
+        const channelId = payload.channel_id;
+        await Promise.all([DBmode(data["display"]),sendBroadcast(channelId, JSON.stringify(message))]);
     }
     
     return false
