@@ -63,3 +63,8 @@ function changeConfig(){
   $.ajax(requests);
   twitch.rig.log("AJAX SENT")
 }
+$(function () {
+  $('#setConfig').click(function(event){
+    changeConfig()
+  })
+}

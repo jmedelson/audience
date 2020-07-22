@@ -6,9 +6,7 @@
 <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
     <div id="app"></div>
     <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous"></script>
+    <script src=".\jquery-3.5.1.js"></script>
     <script src="config.js" type="text/javascript"></script>
     <h2>Configure Page</h2>
     <p>Set tally limits here using the input fields below</p>
@@ -24,6 +22,6 @@
     <label for="input4">Tally 4</label>
     <input type="number" class="data" placeholder="100" id='input4'>
     <br>
-    <button onclick="changeConfig()" style="margin-top: 10px; font-size: 18px;">Set Limits</button>
+    <button id='setConfig' style="margin-top: 10px; font-size: 18px;">Set Limits</button>
 </body>
 </html>
