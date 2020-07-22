@@ -213,6 +213,21 @@ function resetMode(){
 }
 // const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 $(function () {
+  $('#two').click(function(event){
+    minusButton()
+  });
+  $('#four').click(function(event){
+    addButton()
+  });
+  $('#tally').click(function(event){
+    tallyMode()
+  });
+  $('#poll').click(function(event){
+    pollMode()
+  });
+  $('#reset').click(function(event){
+    resetMode()
+  });
   // when we click the cycle button
   $('.tally-button').click(function(event){
     if(modePoll){
